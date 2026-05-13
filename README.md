@@ -123,17 +123,21 @@ Edit `worker.js` to customize:
 
 ```
 url-shortener/
-├── index.html      # Frontend (Static site)
-├── worker.js       # Cloudflare Worker (Backend)
-├── wrangler.toml   # Deployment config
-└── README.md       # This file
+├── index.html                # Frontend (Static site)
+├── functions/
+│   └── api/
+│       └── shorten.js       # API Handler (Cloudflare Pages Functions)
+├── wrangler.toml            # Deployment config
+└── README.md                # This file
 ```
 
 ## 🌐 Live Demo
 
-**Frontend:** [LinkSnip Demo](https://linksnip.pages.dev)
+**Frontend:** [LinkSnip Demo](https://8edd9388.linksnip.pages.dev)
 
-**API Endpoint:** `https://linksnip.workers.dev`
+**API Endpoint:** `https://8edd9388.linksnip.pages.dev/api/shorten`
+
+> Note: The URL will change with each deployment. Re-deploy to get a stable URL or connect a custom domain.
 
 ## 🔐 Environment Variables
 

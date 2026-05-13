@@ -416,14 +416,19 @@
             `;
 
             try {
-                // Simulate API call - in production, this would call your backend
-                const shortCode = generateShortCode();
-                const shortUrl = `https://${domain}/${shortCode}`;
+                // Call the real API
+                const response = await fetch('/api/shorten', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url, domain: domain === 'custom' ? 'linksnip.pages.dev' : domain })
+                });
 
-                // Simulate network delay for realism
-                await new Promise(resolve => setTimeout(resolve, 800));
+                if (!response.ok) {
+                    throw new Error('API error');
+                }
 
-                showResult(shortUrl, false);
+                const data = await response.json();
+                showResult(data.shortUrl, false);
             } catch (error) {
                 showResult('Failed to shorten URL. Please try again.', true);
             } finally {

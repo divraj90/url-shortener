@@ -2,7 +2,7 @@ name = "linksnip"
 main = "worker.js"
 compatibility_date = "2024-01-01"
 
-# KV Namespace for storing URL mappings
+# KV Namespace for storing URL mappings (optional - uncomment after creating in dashboard)
 # [[kv_namespaces]]
 # binding = "URLS"
 # id = "your-kv-namespace-id"
