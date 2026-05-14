@@ -1,155 +1,79 @@
-# 🔗 LinkSnip - URL Shortener
+# LinkSnip - URL Shortener
 
-> A minimal, interactive URL shortener built with Cloudflare Workers. Perfect for learning modern web architecture and serverless development.
+> A minimal URL shortener that converts long URLs into short, shareable links with custom domain support.
 
-![Preview](https://via.placeholder.com/600x400/141416/6366f1?text=LinkSnip+Preview)
+## What is this?
 
-## ✨ Features
+LinkSnip takes a long URL and generates a short code that redirects to the original URL. Users can choose from preset short domains or add their own custom domain.
 
-- **Custom Domain Selection** - Choose from multiple short domains or add your own
-- **Edge Computing** - Powered by Cloudflare Workers for global low-latency
-- **Serverless Architecture** - No server management, auto-scaling
-- **Clean UI** - Modern, minimal design with smooth interactions
-
-## 🏗️ Architecture
+## How it Shortens URLs
 
 ```
-┌─────────────┐     ┌──────────────┐     ┌─────────────┐
-│   User      │────▶│ Cloudflare   │────▶│   KV Store  │
-│  Browser    │     │   Workers    │     │  (Storage)  │
-└─────────────┘     └──────────────┘     └─────────────┘
-                           │
-                           ▼
-                    ┌──────────────┐
-                    │   301 Redirect│
-                    └──────────────┘
+User Input                    Generated Short URL
+─────────────                 ───────────────────
+https://example.com/very      ──► https://x.co/abc123
+/long/url/with/many            ──► https://linksnip.dev/xyz789
+/parameters
 ```
 
-### Tech Stack
+1. User submits a long URL + selects a short domain
+2. System generates a random 6-character code (e.g., `abc123`)
+3. Short URL is stored as: `https://{domain}/{code}` → `original_url`
+4. When访问 short URL, system redirects to the stored original URL
+
+## Architecture
+
+```
+┌─────────────┐
+│   User      │  1. POST URL + domain
+│  Browser    │───────────────────▶
+└─────────────┘
+      │                              ┌──────────────┐
+      │  2. Returns short URL        │   API        │
+      │◀─────────────────────────────│  (functions) │
+      │                              └──────────────┘
+      │
+      │  3. Access short URL
+      ▼──────────────────────────────────────────▶  4. Redirects to original URL
+```
+
+## Tech Stack
 
 | Layer | Technology |
 |-------|-------------|
-| Frontend | Vanilla JS + CSS |
-| Backend | Cloudflare Workers |
-| Storage | Cloudflare KV |
-| CDN | Cloudflare Global Network |
+| Frontend | HTML, CSS, JavaScript |
+| Backend | Cloudflare Pages Functions |
+| Deployment | Cloudflare Pages |
 
-## 🎯 Interview Talking Points
-
-> Here's how to explain this project in interviews:
-
-### 1. Serverless & Edge Computing
-> "This runs on Cloudflare Workers, which means the code executes at the edge - closer to users worldwide. No cold starts, sub-10ms latency."
-
-### 2. KV Store
-> "URL mappings are stored in Cloudflare KV, a global key-value store that replicates to 300+ datacenters. Reads are ~5ms."
-
-### 3. 301 vs 302 Redirects
-> "We use 301 (permanent) redirects for SEO benefits. Search engines transfer ~95% of page rank to the destination."
-
-### 4. Rate Limiting
-> "Workers include built-in rate limiting to prevent abuse - essential for production systems."
-
-## 🚀 Quick Start
-
-### Option 1: Static Demo (Frontend Only)
-
-Simply open `index.html` in your browser - the demo mode works without a backend!
-
-### Option 2: Deploy Backend
-
-```bash
-# Install Wrangler CLI
-npm install -g wrangler
-
-# Login to Cloudflare
-wrangler login
-
-# Deploy
-wrangler deploy
-
-# Or deploy to staging
-wrangler deploy --env staging
-```
-
-### Option 3: GitHub Pages (Frontend Only)
-
-1. Go to Settings → Pages
-2. Deploy from `main` branch
-3. Your site is live at `yourusername.github.io/url-shortener`
-
-## 📡 API Reference
-
-### Create Short URL
-```bash
-POST /api/shorten
-Content-Type: application/json
-
-{
-  "url": "https://example.com/very-long-url",
-  "domain": "linksnip.dev"
-}
-```
-
-**Response:**
-```json
-{
-  "shortUrl": "https://linksnip.dev/abc123",
-  "shortCode": "abc123",
-  "originalUrl": "https://example.com/..."
-}
-```
-
-### Redirect
-```
-GET /{shortCode}
-```
-Returns `301 Redirect` to original URL
-
-### Get Stats
-```
-GET /api/stats/{shortCode}
-```
-
-## 🔧 Configuration
-
-Edit `worker.js` to customize:
-
-- `DEFAULT_DOMAINS` - Available short domains
-- Short code length (default: 6 characters)
-- Rate limiting thresholds
-
-## 📦 Project Structure
+## Project Structure
 
 ```
 url-shortener/
-├── index.html                # Frontend (Static site)
+├── index.html              # Main frontend UI
 ├── functions/
 │   └── api/
-│       └── shorten.js       # API Handler (Cloudflare Pages Functions)
-├── wrangler.toml            # Deployment config
-└── README.md                # This file
+│       └── shorten.js     # API endpoint handler
+├── worker.js              # Cloudflare Worker (alternative)
+├── wrangler.toml         # Deployment configuration
+└── README.md
 ```
 
-## 🌐 Live Demo
+## API Endpoint
 
-**Frontend:** [LinkSnip Demo](https://8edd9388.linksnip.pages.dev)
+```
+POST /api/shorten
+Content-Type: application/json
 
-**API Endpoint:** `https://8edd9388.linksnip.pages.dev/api/shorten`
+Request:
+{
+  "url": "https://example.com/long/url",
+  "domain": "x.co"
+}
 
-> Note: The URL will change with each deployment. Re-deploy to get a stable URL or connect a custom domain.
-
-## 🔐 Environment Variables
-
-| Variable | Description |
-|----------|-------------|
-| `URLS` | KV Namespace binding for URL storage |
-
-## 📝 License
-
-MIT License - Feel free to use this for learning or your own projects!
-
----
-
-**Built with ☁️ Cloudflare Workers**
-*Perfect for: portfolio projects, learning serverless, interview preparation*
+Response:
+{
+  "shortUrl": "https://x.co/abc123",
+  "shortCode": "abc123",
+  "originalUrl": "https://example.com/long/url"
+}
+```
